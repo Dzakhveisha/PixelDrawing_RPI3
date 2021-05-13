@@ -81,6 +81,8 @@ body{
     float: left;
     background-color: white;
     margin: 0 auto;
+    cursor: pointer;
+    /*cursor: url(../img/cursorBrush.png), pointer;*/
 }
 
 .dropdown-content {

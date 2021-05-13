@@ -1,24 +1,27 @@
-const express = require('express');
-const http = require('http');
 const WebSocket = require('ws');
 
-const port = 6969;
-const server = http.createServer(express);
-const wss = new WebSocket.Server({ server })
+let idCounter = 0;
+const wsServer = new WebSocket.Server({port: 6968});
+wsServer.on('connection', onConnect);
 
-wss.on('connection', function connection(ws) {
-    ws.on('message', function incoming(data) {
+function onConnect(wsClient) {
+    console.log('Новый пользователь');
+    idCounter++;
+    wsClient.send(JSON.stringify({type: "newId",id: idCounter}));
 
-        wss.clients.forEach(function each(client) {
-             if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(data);
-             }
+    wsClient.on('message', function(message) {
+        wsServer.clients.forEach(function each(client) {
+            if (client !== wsServer && client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
         })
     })
-})
 
-server.listen(port, function() {
-    console.log(`Server is listening on ${port}!`)
-})
+    wsClient.on('close', function() {
+        console.log('Пользователь отключился');
+    })
+}
+
+console.log('Сервер запущен на 6968 порту');
 
 

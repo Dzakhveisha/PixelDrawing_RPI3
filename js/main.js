@@ -16,6 +16,83 @@ let boardCheme;
 initBoardCheme();
 startDraw()
 
+//webSocket
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+let ws;
+let id;
+InitWS();
+
+function InitWS() {
+    if (ws) {
+        ws.onerror = ws.onopen = ws.onclose = null;
+        ws.close();
+    }
+    ws = new WebSocket('ws://localhost:6968');
+    ws.onopen = () => {
+        console.log('Connection opened!');
+    }
+    ws.onmessage = ({data}) => {
+        let dataAr = JSON.parse(data);
+        console.log(dataAr)
+        switch (dataAr["type"]) {
+            case "draw":
+                boardCheme[parseInt(dataAr["x"])][parseInt(dataAr["y"])] = dataAr["color"];
+                break;
+            case "newId":
+                id = dataAr["id"];
+                break;
+            case "newSize":
+                size = dataAr["size"];
+                pixelsize = (canvas.width / size);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                initBoardCheme();
+                break;
+            case "cursor":
+                if (id !== dataAr["id"]) {
+                    let div = document.getElementById('cursor' + dataAr["id"]);
+                    if (div == null){
+                        div = document.createElement("div");
+                        div.innerHTML = '<img src="img/cursorBrush.png">';
+                        div.style.position = "absolute";
+                        div.style.top = "0";
+                        div.style.left = '0';
+                        div.id = 'cursor' + dataAr["id"];
+                        document.body.appendChild(div);
+                    }
+                    div.style.top = dataAr["y"] + "px";
+                    div.style.left = dataAr["x"] + "px";
+                    console.log(div);
+                }
+                break;
+            case "exit":
+                document.getElementById('cursor' + dataAr["id"]).remove();
+                break;
+        }
+    };
+    ws.onclose = function () {
+        ws = null;
+    }
+}
+
+function send(object) {
+    if (!ws) {
+        alert("No WebSocket connection :(");
+    } else {
+        let data = JSON.stringify(object);
+        ws.send(data);
+    }
+}
+
+document.addEventListener("mousemove", ev => {
+    send({type: "cursor", x: ev.pageX, y: ev.pageY, id: id});
+});
+
+window.addEventListener("unload", ev => {
+    send({type : 'exit', id : id});
+})
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function initBoardCheme() {
     boardCheme = Array();
     for (let i = 0; i < size; i++) {
@@ -41,12 +118,14 @@ function startDraw() {
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 canvas.addEventListener("mousemove", ev => {
     let x = Math.ceil((ev.pageX - canvas.offsetLeft) / pixelsize - 1);
     let y = Math.ceil((ev.pageY - canvas.offsetTop) / pixelsize - 1);
     curPixel = [x, y];
     if (isDrawing) {
         boardCheme[x][y] = curPenColor;
+        send({type: "draw", x: x, y: y, color: curPenColor})
     }
 })
 canvas.addEventListener("mouseleave", ev => {
@@ -55,6 +134,7 @@ canvas.addEventListener("mouseleave", ev => {
 canvas.addEventListener("mousedown", ev => {
     if (curInstrument === "draw") {
         boardCheme[curPixel[0]][curPixel[1]] = curPenColor;
+        send({type: "draw", x: curPixel[0], y: curPixel[1], color: curPenColor})
         isDrawing = true;
     }
 })
@@ -64,6 +144,7 @@ canvas.addEventListener("mouseup", ev => {
 
 function fillPixel(x, y, color) {
     boardCheme[x][y] = curFillColor;
+    send({type: "draw", x: x, y: y, color: curFillColor})
     if ((x - 1) >= 0) {
         if (boardCheme[x - 1][y] === color) {
             fillPixel(x - 1, y, color)
@@ -123,6 +204,7 @@ document.getElementById("changeSize").addEventListener("click", ev => {
         pixelsize = (canvas.width / size);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         initBoardCheme();
+        send({type: "newSize", size: size})
     }
 })
 
