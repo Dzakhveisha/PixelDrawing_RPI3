@@ -9,9 +9,12 @@ let isDrawing = false;
 let curPenColor = "#000000"
 let curFillColor = "#ffffff"
 let curInstrument = "draw";
+document.getElementById("draw").classList.add("cur");
+document.getElementById("size").classList.add("cur");
 
 let boardCheme;
 initBoardCheme();
+startDraw()
 
 function initBoardCheme() {
     boardCheme = Array();
@@ -23,35 +26,70 @@ function initBoardCheme() {
     }
 }
 
+function startDraw() {
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            if (i === j) {
+                boardCheme[i][j] = "#373770";
+            } else if (i + j === 3) {
+                boardCheme[i][j] = "#81b5d9";
+            } else {
+                boardCheme[i][j] = "#f7ff8a";
+            }
+        }
+    }
+}
+
 
 canvas.addEventListener("mousemove", ev => {
-    let x = Math.ceil((ev.pageX - canvas.offsetLeft) / pixelsize - 1) * pixelsize;
-    let y = Math.ceil((ev.pageY - canvas.offsetTop) / pixelsize - 1) * pixelsize;
+    let x = Math.ceil((ev.pageX - canvas.offsetLeft) / pixelsize - 1);
+    let y = Math.ceil((ev.pageY - canvas.offsetTop) / pixelsize - 1);
     curPixel = [x, y];
     if (isDrawing) {
-        boardCheme[x / pixelsize][y / pixelsize] = curPenColor;
+        boardCheme[x][y] = curPenColor;
     }
 })
 canvas.addEventListener("mouseleave", ev => {
     curPixel = null;
 })
 canvas.addEventListener("mousedown", ev => {
-    let x = Math.ceil((ev.pageX - canvas.offsetLeft) / pixelsize - 1);
-    let y = Math.ceil((ev.pageY - canvas.offsetTop) / pixelsize - 1);
     if (curInstrument === "draw") {
-        boardCheme[x][y] = curPenColor;
+        boardCheme[curPixel[0]][curPixel[1]] = curPenColor;
         isDrawing = true;
     }
 })
 canvas.addEventListener("mouseup", ev => {
     isDrawing = false;
 })
+
+function fillPixel(x, y, color) {
+    boardCheme[x][y] = curFillColor;
+    if ((x - 1) >= 0) {
+        if (boardCheme[x - 1][y] === color) {
+            fillPixel(x - 1, y, color)
+        }
+    }
+    if ((x + 1) < size) {
+        if (boardCheme[x + 1][y] === color) {
+            fillPixel(x + 1, y, color)
+        }
+    }
+    if ((y + 1) < size) {
+        if (boardCheme[x][y + 1] === color) {
+            fillPixel(x, y + 1, color)
+        }
+    }
+    if ((y - 1) >= 0) {
+        if (boardCheme[x][y - 1] === color) {
+            fillPixel(x, y - 1, color)
+        }
+    }
+}
+
 canvas.addEventListener("click", ev => {
-    if (curInstrument === "fill"){
-        for (let i = 0; i < size; i++) {
-            for (let j = 0; j < size; j++) {
-                boardCheme[i][j] = curFillColor;
-            }
+    if (curInstrument === "fill") {
+        if (curFillColor !== boardCheme[curPixel[0]][curPixel[1]]) {
+            fillPixel(curPixel[0], curPixel[1], boardCheme[curPixel[0]][curPixel[1]]);
         }
     }
 })
@@ -107,6 +145,26 @@ document.getElementById("draw").addEventListener("click", ev => {
     document.getElementById("fill").classList.remove("cur");
 });
 
+//hot keys
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+window.addEventListener("keydown", ev => {
+    switch (ev.code) {
+        case "KeyB":
+            document.getElementById("fill").click();
+            break;
+        case "KeyP":
+            document.getElementById("draw").click();
+            break;
+        case "KeyC":
+            if (curInstrument === "fill") {
+                document.getElementById("colorFillPick").click();
+            } else
+                document.getElementById("colorPenPick").click();
+            break;
+    }
+})
+
 
 // repaint
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +185,7 @@ function repaintBoard() {
     if (!isDrawing) {
         ctx.fillStyle = "#a1a1a1";
         if (curPixel != null) {
-            ctx.fillRect(curPixel[0], curPixel[1], pixelsize, pixelsize)
+            ctx.fillRect(curPixel[0] * pixelsize, curPixel[1] * pixelsize, pixelsize, pixelsize)
         }
     }
 
