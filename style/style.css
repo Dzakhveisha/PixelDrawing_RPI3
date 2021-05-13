@@ -1,0 +1,128 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    color: black;
+    font-weight: 800;
+}
+button{
+    padding: 5px;
+    border: none;
+    font: inherit;
+    color: inherit;
+    background-color: transparent;
+    cursor: pointer
+}
+
+.cur{
+    background-color: #a0badb;
+}
+
+button:active, button:focus, input:active, input:focus {
+    outline: none;
+}
+button::-moz-focus-inner {
+    border: 0;
+}
+input[type="color" i]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+body{
+    background-color: aliceblue;
+}
+
+#drawBoard{
+    display: flex;
+    width: 100%;
+    margin: 60px 20px 20px;
+}
+
+#controls{
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#fill, #draw{
+    margin: 10px 0px;
+    vertical-align: center;
+    text-decoration: none;
+    width: 80px;
+    height: 60px;
+    text-align: center;
+    transition: .3s;
+}
+#controls .color{
+    background-color: white;
+    vertical-align: center;
+    margin: 10px 0px;
+    text-decoration: none;
+    width: 80px;
+    height: 60px;
+    transition: .3s;
+    border: none;
+}
+#fill:hover, #draw:hover,  .color:hover{
+    background: #ffffe3;
+    box-shadow: 0 5px 15px #ffff24;
+    transform: translateX(10px);
+}
+#fill:active, #draw:active, #dropbtn:active, .color:active {
+    background: #f8fc9a; /* при нажатии */
+}
+
+#controls button img{
+    height: 50px;
+    width: 50px;
+}
+
+#board {
+    float: left;
+    background-color: white;
+    margin: 0 auto;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: #ffffe3;
+    min-width: 180px;
+    height: 30px;
+    padding: 15px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+.dropdown-content .container{
+    margin: 0px 10px;
+   font-size: 20px ;
+    font-weight: normal;
+}
+.sizedown:hover .dropdown-content {
+    display: block;
+}
+
+.dropbtn {
+    width: 80px;
+    height: 60px;
+    margin: 10px 0px;
+    transition: .3s;
+}
+
+.sizedown:hover .dropbtn {
+    display: block;
+    background: #ffffe3;
+    box-shadow: 0 5px 15px #ffff24;
+    transform: translateX(10px);
+}
+
+#changeSize{
+    padding: 3px;
+    height: 30px;
+}
+#changeSize:hover{
+    background-color: white;
+}
+#changeSize:active{
+    background-color: #f8fc9a;
+}
