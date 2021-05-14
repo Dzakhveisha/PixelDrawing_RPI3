@@ -13,7 +13,7 @@ document.getElementById("draw").classList.add("cur");
 document.getElementById("size").classList.add("cur");
 
 let boardCheme;
-initBoardCheme();
+initBoardCheme(curFillColor);
 startDraw()
 
 //webSocket
@@ -42,10 +42,11 @@ function InitWS() {
                 id = dataAr["id"];
                 break;
             case "newSize":
+                console.log(dataAr)
                 size = dataAr["size"];
                 pixelsize = (canvas.width / size);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                initBoardCheme();
+                initBoardCheme(dataAr["color"]);
                 break;
             case "cursor":
                 if (id !== dataAr["id"]) {
@@ -93,12 +94,12 @@ window.addEventListener("unload", ev => {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function initBoardCheme() {
+function initBoardCheme(color) {
     boardCheme = Array();
     for (let i = 0; i < size; i++) {
         boardCheme.push(Array());
         for (let j = 0; j < size; j++) {
-            boardCheme[i].push(curFillColor);
+            boardCheme[i].push(color);
         }
     }
 }
@@ -203,8 +204,8 @@ document.getElementById("changeSize").addEventListener("click", ev => {
         }
         pixelsize = (canvas.width / size);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        initBoardCheme();
-        send({type: "newSize", size: size})
+        initBoardCheme(curFillColor);
+        send({type: "newSize", size: size, color: curFillColor})
     }
 })
 
